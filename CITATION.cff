@@ -1,0 +1,24 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: BTTree-Reduce
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ari
+    family-names: Markowitz
+    email: ari.markowitz@auckland.ac.nz
+    affiliation: University of Auckland
+    orcid: 'https://orcid.org/0009-0009-4752-1480'
+repository-code: 'https://github.com/ariymarkowitz/BTTree-Reduce'
+abstract: >-
+  A Magma package for identifying discrete free subgroups of
+  the Bruhat-Tits tree, and solving the constructive
+  membership problem
+keywords:
+  - Group theory
+  - Geometry
+license: GPL-3.0
