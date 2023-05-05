@@ -60,42 +60,142 @@ RandomGens := function(n, K, B)
   M := MatrixAlgebra(K, 2);
   i := 1;
   while i le n do
-    repeat a := Random(Z,B) * p^Random(Z,B); until a ne 0;
-    b := Random(Z,B) * p^Random(Z,B);
-    c := Random(Z,B) * p^Random(Z,B);
-    d := (1 + b * c) / a;
-    A := M![a, b, c, d];
-    if not IsElliptic(A) then
-      gens[i] := A;
-    end if;
+    repeat
+      repeat a := Random(Z,B) * p^Random(Z,B); until a ne 0;
+      b := Random(Z,B) * p^Random(Z,B);
+      c := Random(Z,B) * p^Random(Z,B);
+      d := (1 + b * c) / a;
+      A := M![a, b, c, d];
+    until IsHyperbolic(A);
+    gens[i] := A;
     i +:= 1;
   end while;
   return gens;
 end function;
 
+RandomAut := function(X, nAut)
+  if #X eq 1 then
+    return X;
+  end if;
+  for i in [1..nAut] do
+    j := Random(1, #X);
+    k := random{k : k in [1..#X] | k ne j};
+    x := X[j];
+    y := X[k];
+    X[j] := eval(Random(["x*y", "x*y^-1", "y*x", "y^-1*x"]));
+  end for;
+  return X;
+end function;
+
+// Same as IsDiscreteFree, but returns how many reduction steps were performed.
+IsDiscreteFreeCount := function(T, X)
+  steps := 1;
+  Y := X;
+  while true do
+    a, b := ReduceGenerators(T, Y);
+    if a eq 0 then
+      // b is the index of a scalar matrix.
+      // Check that Y approximates a scalar matrix.
+      A := Y[b];
+      if IsApproximatelyIdentity(A) then
+        Remove(~Y, b);
+      else
+        return false, Y[b], steps;
+      end if;
+    elif a eq 1 then
+      Y := b;
+    else
+      return true, Y, steps;
+    end if;
+    steps +:= 1;
+  end while;
+end function;
+
 p := 5;
-Qp := pAdicField(p,100);
+Qp := pAdicField(p,1000);
 T := BruhatTitsTree(Qp);
 
 // Verify that the algorithm is correct.
+// Breaks if a discrete free isometry does not satisfy the Ping Pong Lemma.
 count := 0;
 while true do
-  gens := RandomGens(5,Qp,5);
+  gens := RandomGens(5,Qp,10);
   count +:= 1;
-  result, reducedGens := IsFreeDiscrete(T, gens);
-  print count, result;
+  t := Cputime();
+  result, reducedGens, steps := IsDiscreteFreeCount(T, gens);
+  t := Cputime(t);
+  print count, result, steps, t/steps;
   if result and not SatisfiesPPL(T, reducedGens) then
+    print result;
     break;
   end if;
 end while;
 
-// Time the program
+// Verify that the algorithm correctly reduces a discrete free group.
+count := 0;
+while true do
+  count +:= 1;
+  // Find a random discrete free group X.
+  repeat
+    gens := RandomGens(5,Qp,10);
+    result, reducedGens := IsDiscreteFree(T, gens);
+  until result;
+  X := RandomAut(reducedGens, 10);
+  print count, IsSameGroup(T, reducedGens, X);
+end while;
+
+// Time the program against number of generators.
 times := 100;
-for j in [1..10] do
-  gensList := [RandomGens(2*j-1, Qp, 3) : i in [1..times]];
+for j in [50..50] do
+  gensList := [RandomGens(2*j-1, Qp, 10) : i in [1..times]];
   t := Cputime();
   for gens in gensList do
     b, result := IsDiscreteFree(T, gens);
   end for;
+  print j, Cputime(t)/times;
+end for;
+
+// Time the program against precision.
+times := 100;
+for j in [100..1000 by 100] do
+  Qp2 := pAdicField(p,j);
+  T2 := BruhatTitsTree(Qp2);
+  gensList := [RandomGens(5, Qp2, 3) : i in [1..times]];
+  t := Cputime();
+  for gens in gensList do
+    b, result := IsDiscreteFree(T2, gens);
+  end for;
   print Cputime(t)/times;
+end for;
+
+// Time the program against number of automorphisms of a discrete free group.
+times := 10;
+for nAuts in [0..10] do
+  gensList := [];
+  stepsum := 0;
+  for i in [1..times] do
+    repeat
+      gens := RandomGens(5,Qp,5);
+      result, reducedGens := IsDiscreteFree(T, gens);
+    until result;
+    gensList[i] := RandomAut(reducedGens, nAuts);
+  end for;
+  t := Cputime();
+  for gens in gensList do
+    b, result, steps := IsDiscreteFreeCount(T, gens);
+    stepsum +:= steps;
+  end for;
+  print Cputime(t)/times, Sprintf("%.1o", Real(stepsum) / times);
+end for;
+
+// Time the average number of steps.
+times := 100;
+stepsum := 0;
+gensList := [RandomGens(5, Qp, 10) : i in [1..times]];
+t := Cputime();
+for gens in gensList do
+  b, result, steps := IsDiscreteFreeCount(T, gens);
+  stepsum +:= steps;
+end for;
+print Cputime(t)/stepsum;
 end for;

@@ -35,7 +35,7 @@ intrinsic LexicalCmp(p::[BTTVert], q::[BTTVert]) -> RngIntElt
 end intrinsic;
 
 intrinsic LexicalCmp(T::BTTree, g::AlgMatElt, h::AlgMatElt) -> RngIntElt
-{ Return -1, 1 or 0 if g < h, g > h, or g = h respectively under the lexical preorder }
+{ Return -1, 1 or 0 if g < h, g > h, or g ≃ h respectively under the lexical preorder }
   v := Origin(T);
   p := Path(v, v*g);
   q := Path(v, v*h);
@@ -93,6 +93,7 @@ Otherwise return 3. }
     for j -> h in X do
       if i eq j then continue; end if;
 
+      // Since X is a sequence, this automatically handles a violation of A1.
       for str in ["h*g", "g*h^-1", "g*h", "h^-1*g"] do
         a := eval(str);
         if LexicalCmp(T, g, a) eq 1 then
@@ -116,7 +117,7 @@ If RequireBasis := true then this function will return false, g if g acts trivia
       if not RequireBasis then
         // Check that Y approximates a scalar matrix.
         A := Y[b];
-        if IsZero(A[1][2]) and IsZero(A[2][1]) and IsZero(A[1][1] - A[2][2]) then
+        if IsApproximatelyIdentity(A) then
           Remove(~Y, b);
           continue;
         end if;
@@ -161,3 +162,26 @@ intrinsic InFreeIsometryGroup(T::BTTree, g::AlgMatElt, X::[AlgMatElt]) -> BoolEl
   _, h := FundamentalDomain(Origin(T)*g^(-1), X);
   return h eq g;
 end intrinsic;
+
+intrinsic IsSameGroup(T::BTTree, X::[AlgMatElt], Y::[AlgMatElt]) -> BoolElt
+{ Return true if X and Y generate the same group. Assumes that X and Y are both discrete and free. }
+  b1, X2 := IsDiscreteFree(T, X);
+  b2, Y2 := IsDiscreteFree(T, Y);
+  if not (b1 and b2) then return false; end if;
+
+  cmp := func<g, h | LexicalCmp(T, g, h)>;
+  X2 := Sort(X2, cmp);
+  Y2 := Sort(Y2, cmp);
+
+  if #X2 ne #Y2 then
+    return false;
+  end if;
+
+  for i -> x in X2 do
+    if not (IsApproximatelyIdentity(x*Y2[i]) or IsApproximatelyIdentity(x*Y2[i]^-1)) then
+      return false;
+    end if;
+  end for;
+
+  return true;
+end intrinsic
