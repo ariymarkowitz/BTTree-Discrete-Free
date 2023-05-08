@@ -145,27 +145,47 @@ while true do
 end while;
 
 // Time the program against number of generators.
-times := 100;
-for j in [50..50] do
-  gensList := [RandomGens(2*j-1, Qp, 10) : i in [1..times]];
+times := 1000;
+for j in [2, 3, 5, 10, 20, 50, 100] do
+  gensList := [RandomGens(j, Qp, 10) : i in [1..times]];
+  nsteps := 0;
   t := Cputime();
   for gens in gensList do
-    b, result := IsDiscreteFree(T, gens);
+    b, result, steps := IsDiscreteFreeCount(T, gens);
+    nsteps +:= steps;
   end for;
-  print j, Cputime(t)/times;
+  t := Cputime(t);
+  print j, t/times, t/nsteps;
+end for;
+
+// Time the program against max valuation of entries.
+times := 1000;
+for j in [3, 5, 7, 10] do
+  gensList := [RandomGens(5, Qp, j) : i in [1..times]];
+  nsteps := 0;
+  t := Cputime();
+  for gens in gensList do
+    b, result, steps := IsDiscreteFreeCount(T, gens);
+    nsteps +:= steps;
+  end for;
+  t := Cputime(t);
+  print j, t/times, t/nsteps;
 end for;
 
 // Time the program against precision.
 times := 100;
 for j in [100..1000 by 100] do
-  Qp2 := pAdicField(p,j);
+  Qp2 := pAdicField(997,j);
   T2 := BruhatTitsTree(Qp2);
   gensList := [RandomGens(5, Qp2, 3) : i in [1..times]];
+  nsteps := 0;
   t := Cputime();
   for gens in gensList do
-    b, result := IsDiscreteFree(T2, gens);
+    b, result, steps := IsDiscreteFreeCount(T2, gens);
+    nsteps +:= steps;
   end for;
-  print Cputime(t)/times;
+  t := Cputime(t);
+  print j, t/times, t/nsteps;
 end for;
 
 // Time the program against number of automorphisms of a discrete free group.
