@@ -107,8 +107,8 @@ Otherwise return 3. }
 end intrinsic;
 
 intrinsic IsDiscreteFree(T::BTTree, X::[AlgMatElt]: RequireBasis := false) -> BoolElt, .
-{ Return false, g if g is an elliptic element of <X>. Otherwise return true, Y where Y is a reduced free basis of <X>.
-If RequireBasis := true then this function will return false, g if g acts trivially on T. }
+{ Return false, g if g is an elliptic element of <X>. Otherwise return true, Y where Y is a strongly N-reduced basis for <X>.
+If `RequireBasis := true`, then this function will return `false, g` if g is an element of <X> corresponding to a nontrivial word in X that acts trivially on T. }
   Y := X;
   while true do
     a, b := ReduceGenerators(T, Y);
@@ -133,7 +133,7 @@ end intrinsic;
 
 intrinsic FundamentalDomain(X::[AlgMatElt], v::BTTVert) -> BTTVert, AlgMatElt
 { Return the representative of v in the fundamental domain, with the corresponding group action.
- X must be a strongly N-reduced free basis for <X>. }
+ X must be a strongly N-reduced basis for <X>. }
   T := Parent(v);
   g := MatrixAlgebra(Field(v), 2)!1;
   w := v;
@@ -154,7 +154,7 @@ intrinsic FundamentalDomain(X::[AlgMatElt], v::BTTVert) -> BTTVert, AlgMatElt
 end intrinsic;
 
 intrinsic InFreeIsometryGroup(T::BTTree, g::AlgMatElt, X::[AlgMatElt]) -> BoolElt
-{ Return true if g is in the group <X> with free basis X }
+{ Return true if g is in <X>. Assumes X is a strongly N-reduced basis. }
   _, h := FundamentalDomain(Origin(T)*g^(-1), X);
   return h eq g;
 end intrinsic;
