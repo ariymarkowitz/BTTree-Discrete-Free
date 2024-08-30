@@ -1,6 +1,6 @@
 # BTTree-Discrete-Free
 
-This package provides tools for indentifying discrete free subgroups of automorphisms of the Bruhat-Tits tree, and other algorithms relating to these groups.
+This package provides tools for deciding whether a subgroup of automorphisms of the Bruhat-Tits tree over a p-adic field is discrete and free, and other algorithms relating to these groups.
 
 This package uses the [BTTree](https://github.com/ariymarkowitz/BTTree) package.
 
