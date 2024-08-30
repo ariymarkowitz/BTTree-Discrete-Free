@@ -131,24 +131,20 @@ If RequireBasis := true then this function will return false, g if g acts trivia
   end while;
 end intrinsic;
 
-intrinsic FundamentalDomain(v::BTTVert, X::[AlgMatElt]) -> BTTVert, AlgMatElt
+intrinsic FundamentalDomain(X::[AlgMatElt], v::BTTVert) -> BTTVert, AlgMatElt
 { Return the representative of v in the fundamental domain, with the corresponding group action.
  X must be a strongly N-reduced free basis for <X>. }
   T := Parent(v);
   g := MatrixAlgebra(Field(v), 2)!1;
   w := v;
+  Xpm := X cat [x^-1 : x in X];
   done := true;
   while done eq true do
     done := false;
-    for h in X do
+    for h in Xpm do
       if LexicalCmp(T, w, w*h) eq 1 then
         w := w * h;
         g := g * h;
-        done := true;
-        break;
-      elif LexicalCmp(T, w, w*h^-1) eq 1 then
-        w := w * h^-1;
-        g := g * h^-1;
         done := true;
         break;
       end if;

@@ -1,3 +1,5 @@
+/** Tests that the methods in Nielsen.m are working correctly. **/
+
 AttachSpec("spec");
 
 /**
@@ -115,7 +117,7 @@ p := 5;
 Qp := pAdicField(p,1000);
 T := BruhatTitsTree(Qp);
 
-// Verify that the algorithm is correct.
+// Verify that `IsDiscreteFree` is correct.
 // Breaks if a discrete free isometry does not satisfy the Ping Pong Lemma.
 count := 0;
 while true do
@@ -131,7 +133,7 @@ while true do
   end if;
 end while;
 
-// Verify that the algorithm correctly reduces a discrete free group.
+// Verify that `IsDiscreteFree` correctly reduces a discrete free group.
 count := 0;
 while true do
   count +:= 1;
@@ -144,7 +146,7 @@ while true do
   print count, IsSameGroup(T, reducedGens, X);
 end while;
 
-// Time the program against number of generators.
+// Time `IsDiscreteFree` against number of generators.
 times := 1000;
 for j in [2, 3, 5, 10, 20, 50, 100] do
   gensList := [RandomGens(j, Qp, 10) : i in [1..times]];
@@ -158,7 +160,7 @@ for j in [2, 3, 5, 10, 20, 50, 100] do
   print j, t/times, t/nsteps;
 end for;
 
-// Time the program against max valuation of entries.
+// Time `IsDiscreteFree` against max valuation of entries.
 times := 1000;
 for j in [3, 5, 7, 10] do
   gensList := [RandomGens(5, Qp, j) : i in [1..times]];
@@ -172,7 +174,7 @@ for j in [3, 5, 7, 10] do
   print j, t/times, t/nsteps;
 end for;
 
-// Time the program against precision.
+// Time `IsDiscreteFree` against precision.
 times := 100;
 for j in [100..1000 by 100] do
   Qp2 := pAdicField(997,j);
@@ -188,34 +190,46 @@ for j in [100..1000 by 100] do
   print j, t/times, t/nsteps;
 end for;
 
-// Time the program against number of automorphisms of a discrete free group.
-times := 10;
-for nAuts in [0..10] do
+// Time `FundamentalDomain` against number of generators.
+trials := 100;
+npoints := 100;
+points := [Random(T, 100 : boundary) : i in [1..npoints]];
+for nGens in [2, 3, 5, 10, 20, 50, 100] do
   gensList := [];
-  stepsum := 0;
-  for i in [1..times] do
+  for i in [1..trials] do
     repeat
-      gens := RandomGens(5,Qp,5);
+      gens := RandomGens(nGens,Qp,10);
       result, reducedGens := IsDiscreteFree(T, gens);
     until result;
-    gensList[i] := RandomAut(reducedGens, nAuts);
+    gensList[i] := reducedGens;
   end for;
   t := Cputime();
   for gens in gensList do
-    b, result, steps := IsDiscreteFreeCount(T, gens);
-    stepsum +:= steps;
+    for point in points do
+      b, g := FundamentalDomain(gens, point);
+    end for;
   end for;
-  print Cputime(t)/times, Sprintf("%.1o", Real(stepsum) / times);
+  print nGens, Cputime(t)/(trials * npoints);
 end for;
 
-// Time the average number of steps.
-times := 100;
-stepsum := 0;
-gensList := [RandomGens(5, Qp, 10) : i in [1..times]];
-t := Cputime();
-for gens in gensList do
-  b, result, steps := IsDiscreteFreeCount(T, gens);
-  stepsum +:= steps;
+// Time `FundamentalDomain` against distance to origin.
+trials := 100;
+npoints := 100;
+gensList := [];
+for i in [1..trials] do
+  repeat
+    gens := RandomGens(5,Qp,10);
+    result, reducedGens := IsDiscreteFree(T, gens);
+  until result;
+  gensList[i] := reducedGens;
 end for;
-print Cputime(t)/stepsum;
+for nDist in [5, 10, 20, 50, 100] do
+  points := [Random(T, nDist : boundary) : i in [1..npoints]];
+  t := Cputime();
+  for gens in gensList do
+    for point in points do
+      b, g := FundamentalDomain(gens, point);
+    end for;
+  end for;
+  print nDist, Cputime(t)/(trials * npoints);
 end for;
