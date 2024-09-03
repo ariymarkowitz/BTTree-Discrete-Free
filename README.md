@@ -2,7 +2,11 @@
 
 This package provides tools for deciding whether a subgroup of automorphisms of the Bruhat-Tits tree over a p-adic field is discrete and free, and other algorithms relating to these groups.
 
-This package uses the [BTTree](https://github.com/ariymarkowitz/BTTree) package.
+This package uses the [BTTree](https://github.com/ariymarkowitz/BTTree) package. To attach both packages, run the following command in Magma:
+
+```
+AttachSpec("BTTree-Reduce/spec");
+```
 
 ## Main intrinsics
 
