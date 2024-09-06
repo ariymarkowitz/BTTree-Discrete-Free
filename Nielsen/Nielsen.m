@@ -108,7 +108,7 @@ end intrinsic;
 
 intrinsic IsDiscreteFree(T::BTTree, X::[AlgMatElt]: RequireBasis := false) -> BoolElt, .
 { Return false, g if g is an elliptic element of <X>. Otherwise return true, Y where Y is a strongly N-reduced basis for <X>.
-If `RequireBasis := true`, then this function will return `false, g` if g is an element of <X> corresponding to a nontrivial word in X that acts trivially on T. }
+If `RequireBasis` is set, then this function will return `false, g` if g is an element of <X> corresponding to a nontrivial word in X that acts trivially on T. }
   Y := X;
   while true do
     a, b := ReduceGenerators(T, Y);
