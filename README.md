@@ -5,7 +5,7 @@ This package provides tools for deciding whether a subgroup of automorphisms of 
 This package uses the [BTTree](https://github.com/ariymarkowitz/BTTree) package. To attach both packages, run the following command in Magma:
 
 ```
-AttachSpec("BTTree-Reduce/spec");
+AttachSpec("BTTree-Discrete-Free/spec");
 ```
 
 ## Main intrinsics
